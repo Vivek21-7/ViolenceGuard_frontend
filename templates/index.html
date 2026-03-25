@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ViolenceGuard — Semi-Automatic Violent Message Detection System">
+    <title>ViolenceGuard — Violent Message Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="brand">
+        <div class="icon">🛡️</div>
+        <span>ViolenceGuard</span>
+    </div>
+</nav>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+    <div class="stat-card">
+        <div class="stat-icon blue">📊</div>
+        <div class="stat-info">
+            <div class="stat-value" id="stat-analyzed">0</div>
+            <div class="stat-label">Messages Analyzed</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">🎯</div>
+        <div class="stat-info">
+            <div class="stat-value">87%</div>
+            <div class="stat-label">Model Accuracy</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon red">🧠</div>
+        <div class="stat-info">
+            <div class="stat-value" id="stat-training">30</div>
+            <div class="stat-label">Training Samples</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+    <!-- Section 1: Live Detector -->
+    <section>
+        <div class="section-title"><span class="emoji">🔍</span> Live Detector</div>
+        <div class="card">
+            <textarea class="detector-textarea" id="input-text"
+                      placeholder="Type or paste any message to analyze for violent content..."></textarea>
+            <div class="detector-actions">
+                <button class="btn btn-primary" id="btn-analyze" onclick="analyzeMessage()">
+                    🔬 Analyze
+                </button>
+                <button class="btn btn-outline" onclick="clearResult()">Clear</button>
+            </div>
+            <div id="result-area"></div>
+        </div>
+    </section>
+
+    <!-- Section 2: Annotation Panel -->
+    <section>
+        <div class="annotation-header">
+            <div class="section-title" style="margin-bottom:0"><span class="emoji">✏️</span> Annotation Panel</div>
+            <button class="btn btn-primary" id="btn-load" onclick="loadUnlabeled()">
+                📥 Load Unlabeled Messages
+            </button>
+        </div>
+        <div class="annotation-grid" id="annotation-grid"></div>
+    </section>
+</div>
+
+<script>
+const API = "";  // same origin — Flask serves the HTML
+let analyzedCount = 0;
+
+// ── Section 1: Live Detector ──
+async function analyzeMessage() {
+    const text = document.getElementById("input-text").value.trim();
+    if (!text) return;
+
+    const btn = document.getElementById("btn-analyze");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+
+    try {
+        const res = await fetch(API + "/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        analyzedCount++;
+        document.getElementById("stat-analyzed").textContent = analyzedCount;
+        showResult(data);
+    } catch (err) {
+        document.getElementById("result-area").innerHTML =
+            '<div class="result-card non-violent" style="border-color:var(--border);background:#fff;">Error connecting to server.</div>';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "🔬 Analyze";
+    }
+}
+
+function showResult(data) {
+    const sev = data.severity;  // "violent", "suspicious", or "non-violent"
+    const pct = Math.round(data.confidence * 100);
+
+    const labelMap = {
+        "violent": "🔴 VIOLENT",
+        "suspicious": "🟡 SUSPICIOUS",
+        "non-violent": "🟢 SAFE",
+    };
+
+    document.getElementById("result-area").innerHTML = `
+        <div class="result-card ${sev}">
+            <span class="result-badge ${sev}">${labelMap[sev]}</span>
+            <div class="confidence-bar-container">
+                <div class="confidence-label">Confidence: ${pct}%</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill ${sev}" style="width:${pct}%"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function clearResult() {
+    document.getElementById("input-text").value = "";
+    document.getElementById("result-area").innerHTML = "";
+}
+
+// Allow Ctrl+Enter to analyze
+document.getElementById("input-text").addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.key === "Enter") analyzeMessage();
+});
+
+// ── Section 2: Annotation Panel ──
+async function loadUnlabeled() {
+    const btn = document.getElementById("btn-load");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Loading...';
+
+    try {
+        const res = await fetch(API + "/unlabeled");
+        const data = await res.json();
+        const grid = document.getElementById("annotation-grid");
+        grid.innerHTML = "";
+
+        for (let i = 0; i < data.messages.length; i++) {
+            const msg = data.messages[i];
+            // Get prediction for each message
+            const predRes = await fetch(API + "/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: msg }),
+            });
+            const pred = await predRes.json();
+            grid.appendChild(createMsgCard(msg, pred, i));
+        }
+    } catch (err) {
+        document.getElementById("annotation-grid").innerHTML =
+            '<div class="card" style="text-align:center;color:var(--text-muted);">Failed to load messages.</div>';
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = "📥 Load Unlabeled Messages";
+    }
+}
+
+function createMsgCard(text, pred, idx) {
+    const card = document.createElement("div");
+    card.className = "msg-card";
+    card.id = "msg-card-" + idx;
+
+    const sev = pred.severity;  // "violent", "suspicious", or "non-violent"
+    const sevLabel = { "violent": "Violent", "suspicious": "Suspicious", "non-violent": "Safe" };
+    const pct = Math.round(pred.confidence * 100);
+    const highConf = pred.confidence >= 0.80;
+
+    card.innerHTML = `
+        <div class="msg-text">"${escapeHtml(text)}"</div>
+        <div class="msg-prediction">
+            <span class="mini-badge ${sev}">${sevLabel[sev]}</span>
+            <span class="confidence-text">${pct}% confidence</span>
+            ${highConf ? '<span class="mini-badge auto">Auto-labeled</span>' : ''}
+        </div>
+        <div class="msg-actions" id="msg-actions-${idx}">
+            ${highConf
+                ? `<div class="labeled-check">✓ Auto-labeled as ${pred.label}</div>`
+                : `<button class="btn btn-red" onclick="annotate(${idx}, '${escapeJs(text)}', 'violent')">✓ Violent</button>
+                   <button class="btn btn-yellow" onclick="annotate(${idx}, '${escapeJs(text)}', 'suspicious')">✓ Suspicious</button>
+                   <button class="btn btn-green" onclick="annotate(${idx}, '${escapeJs(text)}', 'non-violent')">✓ Non-Violent</button>`
+            }
+        </div>
+    `;
+
+    // Auto-annotate high confidence
+    if (highConf) {
+        card.classList.add("labeled");
+        autoAnnotate(text, pred.label);
+    }
+
+    return card;
+}
+
+async function autoAnnotate(text, label) {
+    try {
+        const res = await fetch(API + "/annotate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, label }),
+        });
+        const data = await res.json();
+        if (data.total_training_samples) {
+            document.getElementById("stat-training").textContent = data.total_training_samples;
+        }
+    } catch (err) {
+        // Silent fail for auto-annotate
+    }
+}
+
+async function annotate(idx, text, label) {
+    const actions = document.getElementById("msg-actions-" + idx);
+    actions.innerHTML = '<span class="spinner-dark spinner"></span>';
+
+    try {
+        const res = await fetch(API + "/annotate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, label }),
+        });
+        const data = await res.json();
+
+        if (data.status === "ok") {
+            const card = document.getElementById("msg-card-" + idx);
+            card.classList.add("labeled");
+            actions.innerHTML = `<div class="labeled-check">✓ Labeled as ${label}</div>`;
+            document.getElementById("stat-training").textContent = data.total_training_samples;
+        }
+    } catch (err) {
+        actions.innerHTML = '<span style="color:var(--red)">Error</span>';
+    }
+}
+
+function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+}
+
+function escapeJs(str) {
+    return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, '\\"');
+}
+</script>
+</body>
+</html>
