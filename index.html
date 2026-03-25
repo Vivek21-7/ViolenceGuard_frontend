@@ -3,71 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ViolenceGuard — Semi-Automatic Violent Message Detection System">
-    <title>ViolenceGuard — Violent Message Detection</title>
+    <meta name="description" content="ViolenceGuard — 5-Class AI Message Intelligence System">
+    <title>ViolenceGuard AI | Advanced Classification</title>
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<!-- Navbar -->
 <nav class="navbar">
     <div class="brand">
         <div class="icon">🛡️</div>
-        <span>ViolenceGuard</span>
+        <span>ViolenceGuard AI</span>
     </div>
 </nav>
 
-<!-- Stats Bar -->
 <div class="stats-bar">
     <div class="stat-card">
-        <div class="stat-icon blue">📊</div>
+        <div class="stat-icon normal">✅</div>
         <div class="stat-info">
-            <div class="stat-value" id="stat-analyzed">0</div>
-            <div class="stat-label">Messages Analyzed</div>
+            <div class="stat-value" id="stat-normal">0</div>
+            <div class="stat-label">Normal</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green">🎯</div>
+        <div class="stat-icon spam">📢</div>
         <div class="stat-info">
-            <div class="stat-value">92%</div>
-            <div class="stat-label">AI Accuracy</div>
+            <div class="stat-value" id="stat-spam">0</div>
+            <div class="stat-label">Spam</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon red">🧠</div>
+        <div class="stat-icon cybercrime">🪝</div>
         <div class="stat-info">
-            <div class="stat-value" id="stat-training">90</div>
-            <div class="stat-label">Multilingual Samples</div>
+            <div class="stat-value" id="stat-cybercrime">0</div>
+            <div class="stat-label">Cybercrime</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon violent">⚔️</div>
+        <div class="stat-info">
+            <div class="stat-value" id="stat-violent">0</div>
+            <div class="stat-label">Violent</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon suspicious">⚠️</div>
+        <div class="stat-info">
+            <div class="stat-value" id="stat-suspicious">0</div>
+            <div class="stat-label">Suspicious</div>
         </div>
     </div>
 </div>
 
-<!-- Main Content -->
 <div class="main">
-
-    <!-- Section 1: Live Detector -->
     <section>
-        <div class="section-title"><span class="emoji">🔍</span> Live Detector</div>
+        <div class="section-title">🔍 Live Message Intelligence</div>
         <div class="card">
             <textarea class="detector-textarea" id="input-text"
-                      placeholder="Type any message (English, Hindi, Telugu, Tamil...) to analyze..."></textarea>
+                      placeholder="Enter any message (English, Hindi, Telugu, Tamil, etc.)..."></textarea>
             <div class="detector-actions">
-                <button class="btn btn-primary" id="btn-analyze" onclick="analyzeMessage()">
-                    🔬 Analyze
-                </button>
+                <button class="btn btn-primary" id="btn-analyze" onclick="analyzeMessage()">🔬 Analyze Message</button>
                 <button class="btn btn-outline" onclick="clearResult()">Clear</button>
             </div>
             <div id="result-area"></div>
         </div>
     </section>
 
-    <!-- Section 2: Annotation Panel -->
     <section>
         <div class="annotation-header">
-            <div class="section-title" style="margin-bottom:0"><span class="emoji">✏️</span> Annotation Panel</div>
-            <button class="btn btn-primary" id="btn-load" onclick="loadUnlabeled()">
-                📥 Load Unlabeled Messages
-            </button>
+            <div class="section-title" style="margin:0">✏️ Manual Annotation Queue</div>
+            <button class="btn btn-primary" id="btn-load" onclick="loadUnlabeled()">📥 Load Unlabeled</button>
         </div>
         <div class="annotation-grid" id="annotation-grid"></div>
     </section>
@@ -75,9 +79,8 @@
 
 <script>
 const API = "https://violenceguard-backend.onrender.com";
-let analyzedCount = 0;
+const counts = { NORMAL: 0, SPAM: 0, CYBERCRIME: 0, VIOLENT: 0, SUSPICIOUS: 0 };
 
-// ── Section 1: Live Detector ──
 async function analyzeMessage() {
     const text = document.getElementById("input-text").value.trim();
     if (!text) return;
@@ -93,31 +96,35 @@ async function analyzeMessage() {
             body: JSON.stringify({ text }),
         });
         const data = await res.json();
-        analyzedCount++;
-        document.getElementById("stat-analyzed").textContent = analyzedCount;
+        
+        counts[data.label]++;
+        updateStats();
         showResult(data);
     } catch (err) {
-        document.getElementById("result-area").innerHTML =
-            '<div class="result-card non-violent" style="border-color:var(--border);background:#fff;">Error connecting to live backend.</div>';
+        document.getElementById("result-area").innerHTML = '<div class="result-card normal">Connection Error</div>';
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "🔬 Analyze";
+        btn.innerHTML = "🔬 Analyze Message";
+    }
+}
+
+function updateStats() {
+    for (const key in counts) {
+        const el = document.getElementById(`stat-${key.toLowerCase()}`);
+        if (el) el.textContent = counts[key];
     }
 }
 
 function showResult(data) {
-    const sev = data.severity;  // "violent", "suspicious", or "non-violent"
+    const sev = data.severity;
+    const label = data.label;
     const pct = Math.round(data.confidence * 100);
 
-    const labelMap = {
-        "violent": "🔴 VIOLENT",
-        "suspicious": "🟡 SUSPICIOUS",
-        "non-violent": "🟢 SAFE",
-    };
+    const icons = { NORMAL: "✅", SPAM: "📢", CYBERCRIME: "🪝", VIOLENT: "⚔️", SUSPICIOUS: "⚠️" };
 
     document.getElementById("result-area").innerHTML = `
         <div class="result-card ${sev}">
-            <span class="result-badge ${sev}">${labelMap[sev]}</span>
+            <span class="result-badge ${sev}">${icons[label] || ""} ${label}</span>
             <div class="confidence-bar-container">
                 <div class="confidence-label">Confidence: ${pct}%</div>
                 <div class="confidence-bar">
@@ -133,12 +140,6 @@ function clearResult() {
     document.getElementById("result-area").innerHTML = "";
 }
 
-// Allow Ctrl+Enter to analyze
-document.getElementById("input-text").addEventListener("keydown", function(e) {
-    if (e.ctrlKey && e.key === "Enter") analyzeMessage();
-});
-
-// ── Section 2: Annotation Panel ──
 async function loadUnlabeled() {
     const btn = document.getElementById("btn-load");
     btn.disabled = true;
@@ -150,80 +151,63 @@ async function loadUnlabeled() {
         const grid = document.getElementById("annotation-grid");
         grid.innerHTML = "";
 
-        for (let i = 0; i < data.messages.length; i++) {
-            const msg = data.messages[i];
-            // Get prediction for each message
+        for (const msg of data.messages) {
             const predRes = await fetch(API + "/predict", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: msg }),
             });
             const pred = await predRes.json();
-            grid.appendChild(createMsgCard(msg, pred, i));
+            grid.appendChild(createMsgCard(msg, pred));
         }
     } catch (err) {
-        document.getElementById("annotation-grid").innerHTML =
-            '<div class="card" style="text-align:center;color:var(--text-muted);">Failed to load messages from Render.</div>';
+        grid.innerHTML = '<div class="card">Failed to load content.</div>';
     } finally {
         btn.disabled = false;
-        btn.innerHTML = "📥 Load Unlabeled Messages";
+        btn.innerHTML = "📥 Load Unlabeled";
     }
 }
 
-function createMsgCard(text, pred, idx) {
+function createMsgCard(text, pred) {
     const card = document.createElement("div");
     card.className = "msg-card";
-    card.id = "msg-card-" + idx;
-
-    const sev = pred.severity;  // "violent", "suspicious", or "non-violent"
-    const sevLabel = { "violent": "Violent", "suspicious": "Suspicious", "non-violent": "Safe" };
-    const pct = Math.round(pred.confidence * 100);
-    const highConf = pred.confidence >= 0.80;
+    const sev = pred.severity;
+    const highConf = pred.confidence >= 0.85;
 
     card.innerHTML = `
         <div class="msg-text">"${escapeHtml(text)}"</div>
         <div class="msg-prediction">
-            <span class="mini-badge ${sev}">${sevLabel[sev]}</span>
-            <span class="confidence-text">${pct}% confidence</span>
-            ${highConf ? '<span class="mini-badge auto">Auto-labeled</span>' : ''}
+            <span class="mini-badge ${sev}">${pred.label}</span>
+            <span class="confidence-text">${Math.round(pred.confidence*100)}%</span>
+            ${highConf ? '<span class="mini-badge auto">Auto</span>' : ''}
         </div>
-        <div class="msg-actions" id="msg-actions-${idx}">
-            ${highConf
-                ? `<div class="labeled-check">✓ Auto-labeled as ${pred.label}</div>`
-                : `<button class="btn btn-red" onclick="annotate(${idx}, '${escapeJs(text)}', 'violent')">✓ Violent</button>
-                   <button class="btn btn-yellow" onclick="annotate(${idx}, '${escapeJs(text)}', 'suspicious')">✓ Suspicious</button>
-                   <button class="btn btn-green" onclick="annotate(${idx}, '${escapeJs(text)}', 'non-violent')">✓ Safe</button>`
-            }
+        <div class="msg-actions">
+            ${highConf ? '<div class="labeled-check">✓ Verified</div>' : `
+                <button class="btn btn-normal" onclick="annotate(this, '${escapeJs(text)}', 'NORMAL')">Safe</button>
+                <button class="btn btn-spam" onclick="annotate(this, '${escapeJs(text)}', 'SPAM')">Spam</button>
+                <button class="btn btn-cybercrime" onclick="annotate(this, '${escapeJs(text)}', 'CYBERCRIME')">Crime</button>
+                <button class="btn btn-violent" onclick="annotate(this, '${escapeJs(text)}', 'VIOLENT')">Threat</button>
+                <button class="btn btn-suspicious" onclick="annotate(this, '${escapeJs(text)}', 'SUSPICIOUS')">Risk</button>
+            `}
         </div>
     `;
-
-    // Auto-annotate high confidence
-    if (highConf) {
-        card.classList.add("labeled");
-        autoAnnotate(text, pred.label);
-    }
-
+    if (highConf) { card.classList.add("labeled"); autoAnnotate(text, pred.label); }
     return card;
 }
 
 async function autoAnnotate(text, label) {
     try {
-        const res = await fetch(API + "/annotate", {
+        await fetch(API + "/annotate", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text, label }),
         });
-        const data = await res.json();
-        if (data.total_training_samples) {
-            document.getElementById("stat-training").textContent = data.total_training_samples;
-        }
-    } catch (err) { }
+    } catch (err) {}
 }
 
-async function annotate(idx, text, label) {
-    const actions = document.getElementById("msg-actions-" + idx);
-    actions.innerHTML = '<span class="spinner-dark spinner"></span>';
-
+async function annotate(btn, text, label) {
+    const parent = btn.parentElement;
+    parent.innerHTML = '<span class="spinner spinner-dark"></span>';
     try {
         const res = await fetch(API + "/annotate", {
             method: "POST",
@@ -231,27 +215,14 @@ async function annotate(idx, text, label) {
             body: JSON.stringify({ text, label }),
         });
         const data = await res.json();
-
         if (data.status === "ok") {
-            const card = document.getElementById("msg-card-" + idx);
-            card.classList.add("labeled");
-            actions.innerHTML = `<div class="labeled-check">✓ Labeled as ${label}</div>`;
-            document.getElementById("stat-training").textContent = data.total_training_samples;
+            parent.innerHTML = `<div class="labeled-check">✓ ${label}</div>`;
         }
-    } catch (err) {
-        actions.innerHTML = '<span style="color:var(--red)">Error</span>';
-    }
+    } catch (err) { parent.innerHTML = "Error"; }
 }
 
-function escapeHtml(str) {
-    const d = document.createElement("div");
-    d.textContent = str;
-    return d.innerHTML;
-}
-
-function escapeJs(str) {
-    return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, '\\"');
-}
+function escapeHtml(str) { const d = document.createElement("div"); d.textContent = str; return d.innerHTML; }
+function escapeJs(str) { return str.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, '\\"'); }
 </script>
 </body>
 </html>

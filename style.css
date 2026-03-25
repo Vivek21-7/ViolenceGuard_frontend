@@ -1,4 +1,4 @@
-/* style.css — ViolenceGuard Clean Modern UI (Sage Green Theme) */
+/* style.css — ViolenceGuard Intelligence System (5-Tier Class) */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
@@ -9,25 +9,36 @@
 }
 
 :root {
-    --bg: #F9FAF9; /* White (60%) */
-    --card: #FFFFFF; /* White (60%) */
-    --sage: #9CAF88; /* Sage Green (30%) */
+    --bg: #F9FAF9;
+    --card: #FFFFFF;
+    --sage: #9CAF88;
     --sage-dark: #7D8F6B;
-    --wood: #A0522D; /* Wood Tone (10%) */
+    --wood: #A0522D;
     --wood-dark: #8B4513;
     --text: #2C332A;
     --text-muted: #707A6D;
-    --red: #EF4444;
-    --red-bg: #FEF2F2;
-    --red-border: #FECACA;
-    --green: #22C55E;
-    --green-bg: #F0FDF4;
-    --green-border: #BBF7D0;
-    --yellow: #F59E0B;
-    --yellow-bg: #FFFBEB;
-    --yellow-border: #FDE68A;
-    --blue: #3B82F6;
-    --blue-bg: #EFF6FF;
+    
+    /* Classification Colors */
+    --normal: #22C55E;      /* Green */
+    --normal-bg: #F0FDF4;
+    --normal-border: #BBF7D0;
+    
+    --spam: #3B82F6;        /* Blue */
+    --spam-bg: #EFF6FF;
+    --spam-border: #BFDBFE;
+    
+    --cybercrime: #EF4444;  /* Red */
+    --cybercrime-bg: #FEF2F2;
+    --cybercrime-border: #FECACA;
+    
+    --violent: #D946EF;     /* Magenta/Purple */
+    --violent-bg: #FDF4FF;
+    --violent-border: #F5D0FE;
+    
+    --suspicious: #F59E0B;  /* Yellow/Amber */
+    --suspicious-bg: #FFFBEB;
+    --suspicious-border: #FDE68A;
+    
     --border: #E8EFE6;
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
     --shadow-lg: 0 10px 25px rgba(0,0,0,0.1), 0 6px 10px rgba(0,0,0,0.06);
@@ -88,7 +99,7 @@ body {
 
 .stat-card {
     flex: 1;
-    min-width: 160px;
+    min-width: 140px;
     background: var(--bg);
     border-radius: 10px;
     padding: 1rem 1.25rem;
@@ -98,30 +109,32 @@ body {
 }
 
 .stat-card .stat-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1rem;
     flex-shrink: 0;
 }
 
-.stat-card .stat-icon.blue { background: var(--blue-bg); }
-.stat-card .stat-icon.green { background: var(--green-bg); }
-.stat-card .stat-icon.red { background: var(--red-bg); }
+.stat-card .stat-icon.normal { background: var(--normal-bg); }
+.stat-card .stat-icon.spam { background: var(--spam-bg); }
+.stat-card .stat-icon.cybercrime { background: var(--cybercrime-bg); }
+.stat-card .stat-icon.violent { background: var(--violent-bg); }
+.stat-card .stat-icon.suspicious { background: var(--suspicious-bg); }
 
 .stat-card .stat-info .stat-value {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
     line-height: 1.2;
 }
 
 .stat-card .stat-info .stat-label {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     color: var(--text-muted);
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -136,7 +149,6 @@ body {
     gap: 2rem;
 }
 
-/* ── Section Headers ── */
 .section-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -147,11 +159,6 @@ body {
     color: var(--text);
 }
 
-.section-title .emoji {
-    font-size: 1.3rem;
-}
-
-/* ── Card ── */
 .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -160,7 +167,6 @@ body {
     box-shadow: var(--shadow);
 }
 
-/* ── Live Detector ── */
 .detector-textarea {
     width: 100%;
     min-height: 120px;
@@ -175,12 +181,9 @@ body {
     background: var(--bg);
 }
 
-.detector-textarea:focus {
-    outline: none;
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-}
+.detector-textarea:focus { outline: none; border-color: var(--sage); }
 
+/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -189,61 +192,28 @@ body {
     border: none;
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.btn-primary {
-    background: var(--wood);
-    color: #fff;
-}
-
+.btn-primary { background: var(--wood); color: #fff; }
 .btn-primary:hover { background: var(--wood-dark); transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: var(--sage); background: var(--bg); }
 
-.btn-outline {
-    background: transparent;
-    border: 2px solid var(--border);
-    color: var(--text);
-}
+/* 5-Class specific buttons */
+.btn-normal { background: var(--normal); color: #fff; }
+.btn-spam { background: var(--spam); color: #fff; }
+.btn-cybercrime { background: var(--cybercrime); color: #fff; }
+.btn-violent { background: var(--violent); color: #fff; }
+.btn-suspicious { background: var(--suspicious); color: #fff; }
 
-.btn-outline:hover { border-color: var(--sage); background: var(--bg); color: var(--sage-dark); }
+.btn:hover { filter: brightness(0.9); transform: translateY(-1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-.btn-red {
-    background: var(--red);
-    color: #fff;
-}
-
-.btn-red:hover { background: #DC2626; }
-
-.btn-yellow {
-    background: var(--yellow);
-    color: #fff;
-}
-
-.btn-yellow:hover { background: #D97706; }
-
-.btn-green {
-    background: var(--green);
-    color: #fff;
-}
-
-.btn-green:hover { background: #16A34A; }
-
-.btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    transform: none !important;
-}
-
-.detector-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    align-items: center;
-}
+.detector-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
 
 /* ── Result Card ── */
 .result-card {
@@ -255,93 +225,45 @@ body {
     animation: fadeInUp 0.4s ease forwards;
 }
 
-.result-card.violent {
-    background: var(--red-bg);
-    border: 2px solid var(--red-border);
-}
+.result-card.normal { background: var(--normal-bg); border: 2px solid var(--normal-border); }
+.result-card.spam { background: var(--spam-bg); border: 2px solid var(--spam-border); }
+.result-card.cybercrime { background: var(--cybercrime-bg); border: 2px solid var(--cybercrime-border); }
+.result-card.violent { background: var(--violent-bg); border: 2px solid var(--violent-border); }
+.result-card.suspicious { background: var(--suspicious-bg); border: 2px solid var(--suspicious-border); }
 
-.result-card.suspicious {
-    background: var(--yellow-bg);
-    border: 2px solid var(--yellow-border);
-}
-
-.result-card.non-violent {
-    background: var(--green-bg);
-    border: 2px solid var(--green-border);
-}
-
-@keyframes fadeInUp {
-    to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
 .result-badge {
     display: inline-block;
     padding: 0.4rem 1rem;
     border-radius: 6px;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
-.result-badge.violent {
-    background: var(--red);
-    color: #fff;
-}
+.result-badge.normal { background: var(--normal); color: #fff; }
+.result-badge.spam { background: var(--spam); color: #fff; }
+.result-badge.cybercrime { background: var(--cybercrime); color: #fff; }
+.result-badge.violent { background: var(--violent); color: #fff; }
+.result-badge.suspicious { background: var(--suspicious); color: #fff; }
 
-.result-badge.suspicious {
-    background: var(--yellow);
-    color: #fff;
-}
+/* Confidence Bar */
+.confidence-bar-container { margin-top: 1rem; }
+.confidence-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+.confidence-bar { height: 8px; background: #E2E8F0; border-radius: 999px; overflow: hidden; }
+.confidence-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
 
-.result-badge.non-violent {
-    background: var(--green);
-    color: #fff;
-}
+.confidence-fill.normal { background: var(--normal); }
+.confidence-fill.spam { background: var(--spam); }
+.confidence-fill.cybercrime { background: var(--cybercrime); }
+.confidence-fill.violent { background: var(--violent); }
+.confidence-fill.suspicious { background: var(--suspicious); }
 
-.confidence-bar-container {
-    margin-top: 1rem;
-}
-
-.confidence-label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-    font-weight: 500;
-}
-
-.confidence-bar {
-    height: 10px;
-    background: #E2E8F0;
-    border-radius: 999px;
-    overflow: hidden;
-}
-
-.confidence-fill {
-    height: 100%;
-    border-radius: 999px;
-    transition: width 0.6s ease;
-}
-
-.confidence-fill.violent { background: var(--red); }
-.confidence-fill.suspicious { background: var(--yellow); }
-.confidence-fill.non-violent { background: var(--green); }
-
-/* ── Annotation Panel ── */
-.annotation-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.annotation-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1rem;
-}
+/* Annotation Panel */
+.annotation-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.annotation-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
 
 .msg-card {
     border: 1px solid var(--border);
@@ -351,105 +273,36 @@ body {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    position: relative;
 }
 
-.msg-card:hover {
-    border-color: #CBD5E1;
-    box-shadow: var(--shadow);
-}
-
-.msg-card.labeled {
-    border-color: var(--green-border);
-    background: var(--green-bg);
-}
-
-.msg-text {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--text);
-}
-
-.msg-prediction {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
+.msg-card.labeled { border-color: var(--sage); background: var(--bg); opacity: 0.8; }
 
 .mini-badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
+    font-size: 0.65rem;
+    padding: 2px 6px;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
 }
 
-.mini-badge.violent { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
-.mini-badge.suspicious { background: var(--yellow-bg); color: var(--yellow); border: 1px solid var(--yellow-border); }
-.mini-badge.non-violent { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
-.mini-badge.auto { background: var(--blue-bg); color: var(--blue); border: 1px solid #BFDBFE; }
+.mini-badge.normal { background: var(--normal-bg); color: var(--normal); border: 1px solid var(--normal-border); }
+.mini-badge.spam { background: var(--spam-bg); color: var(--spam); border: 1px solid var(--spam-border); }
+.mini-badge.cybercrime { background: var(--cybercrime-bg); color: var(--cybercrime); border: 1px solid var(--cybercrime-border); }
+.mini-badge.violent { background: var(--violent-bg); color: var(--violent); border: 1px solid var(--violent-border); }
+.mini-badge.suspicious { background: var(--suspicious-bg); color: var(--suspicious); border: 1px solid var(--suspicious-border); }
+.mini-badge.auto { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
 
-.confidence-text {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-weight: 500;
-}
+.msg-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+.msg-actions .btn { padding: 0.4rem; justify-content: center; font-size: 0.7rem; }
+.msg-actions .btn:nth-child(n+4) { grid-column: span 1; }
+.msg-actions .btn:nth-child(n+4):last-child { grid-column: span 2; } /* Suspicious spanning 2 if wanted */
 
-.msg-actions {
-    display: flex;
-    gap: 0.5rem;
-}
+/* Adjusting to 2 rows for 5 buttons */
+.msg-actions { display: flex; flex-wrap: wrap; gap: 4px; }
+.msg-actions .btn { flex: 1 0 calc(33.3% - 4px); min-width: 80px; }
 
-.msg-actions .btn {
-    flex: 1;
-    justify-content: center;
-    padding: 0.5rem;
-    font-size: 0.8rem;
-}
+.labeled-check { display: flex; align-items: center; gap: 6px; color: var(--sage-dark); font-weight: 700; font-size: 0.8rem; }
 
-.labeled-check {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--green);
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
-/* ── Spinner ── */
-.spinner {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border: 2.5px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.spinner-dark {
-    border-color: rgba(0,0,0,0.1);
-    border-top-color: var(--wood);
-}
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-    .navbar { padding: 0 1rem; }
-    .stats-bar { padding: 0.75rem 1rem; }
-    .main { padding: 0 1rem; margin: 1rem auto; gap: 1.25rem; }
-    .annotation-grid { grid-template-columns: 1fr; }
-    .card { padding: 1.15rem; }
-}
-
-@media (max-width: 480px) {
-    .stat-card { min-width: 100%; }
-    .detector-actions { flex-direction: column; }
-    .detector-actions .btn { width: 100%; justify-content: center; }
-}
+/* Spinner */
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
